@@ -1,0 +1,6 @@
+pytest-playwright
+playwright~=1.45.1
+configparser
+pytest~=8.3.2
+allure-pytest
+pytest-xdist

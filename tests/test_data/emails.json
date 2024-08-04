@@ -1,0 +1,17 @@
+[
+  {
+    "email": "test@test"
+  },
+  {
+    "email": "@gmail.com"
+  },
+  {
+    "email": "noat.com"
+  },
+  {
+    "email": "nodomain@.bg"
+  },
+  {
+    "email": "spaces in email@gmail.com"
+  }
+]
