@@ -1,51 +1,37 @@
 from typing import Self
 
-from playwright.sync_api import Page, Locator
+import allure
+from playwright.sync_api import Page, expect
 
-
-class BasePage:
-    def __init__(self, page: Page) -> None:
-        self.page = page
-
-    def get_button(self, button_name: str) -> Locator:
-        return self.page.get_by_role('button', name=button_name)
-
-
-class CompanyPage(BasePage):
-    def __init__(self, page: Page) -> None:
-        super().__init__(page)
-
-
-class CheckPositionsPage(BasePage):
-    def __init__(self, page: Page) -> None:
-        super().__init__(page)
-
-
-class CareersPage(BasePage):
-    BTN_CHECK_POSITIONS: Locator = None
-
-    class Btn:
-        CHECK_POSITIONS: Locator = None
-
-    def __init__(self, page: Page) -> None:
-        super().__init__(page)
-        self.Btn.CHECK_POSITIONS = self.get_button('Check our open positions')
-
-    def get_check_positions_page(self) -> CheckPositionsPage:
-        self.Btn.CHECK_POSITIONS.click()
-        return CheckPositionsPage(self.page)
+from page_objects.base_page import BasePage
+from page_objects.navigation_menu import NavigationMenu
 
 
 class MainPage(BasePage):
-    MENU_ITEM = '//div[@id="menu"]//a[text()="{}"]'
+    BTN_CONTACT_US = '//button[contains(@class, "contact")]'
 
     def __init__(self, page: Page) -> None:
         super().__init__(page)
+        self.navigation_menu = NavigationMenu(page)
 
-    def navigate_menu(self, menu_item: str) -> Self:
-        self.page.locator(self.MENU_ITEM.format(menu_item)).dispatch_event('click')
+    @allure.step('Open contact form')
+    def get_contact_us(self) -> Self:
+        self.page.locator(self.BTN_CONTACT_US).click()
         return self
 
-    def get_careers_page(self) -> CareersPage:
-        self.navigate_menu('Careers')
-        return CareersPage(self.page)
+    @allure.step('Fill contact form with data: name {name}, email {email}, mobile {mobile}, subject {subject}, msg {msg}')
+    def fill_contact_form(self, name: str, email: str, mobile: str, subject: str, msg: str) -> Self:
+        self.page.get_by_label('Name').fill(name)
+        self.page.get_by_label('Email').fill(email)
+        self.page.get_by_label('Mobile').fill(mobile)
+        self.page.get_by_label('Subject').fill(subject)
+        self.page.get_by_label('Your Message').fill(msg)
+
+        self.page.locator('//input[@type="checkbox"][@id="adConsentChx"]').click()
+        self.page.get_by_role('button', name="Send").click()
+        return self
+
+    @allure.step('Check error message')
+    def assert_error_message(self, error_message: str) -> Self:
+        expect(self.page.locator('//span[@data-name="your-email"]//span')).to_have_text(error_message)
+        return self

@@ -4,3 +4,4 @@ configparser
 pytest~=8.3.2
 allure-pytest
 pytest-xdist
+requests~=2.32.3
